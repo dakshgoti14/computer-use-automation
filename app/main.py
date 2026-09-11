@@ -72,7 +72,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     if settings.public_demo_mode:
         @app.get("/demo")
         async def demo():  # noqa: ANN202 - HTMLResponse, kept local to avoid an unused import path when disabled
-            return demo_page()
+            return demo_page(Path(settings.evidence_dir))
 
         @app.get("/")
         async def root_redirect():

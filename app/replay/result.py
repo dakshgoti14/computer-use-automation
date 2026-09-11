@@ -100,6 +100,11 @@ class StepOutcome(BaseModel):
     checkpoints: list[CheckpointResult] = Field(default_factory=list)
     error_code: str | None = None
     error_message: str | None = None
+    #: Populated only when the caller opted into per-step screenshots
+    #: (ReplayEngine(capture_screenshots=True) - see its docstring for why
+    #: this isn't the default). An absolute filesystem path, matching
+    #: evidence_ref's convention elsewhere in this module.
+    screenshot_ref: str | None = None
 
 
 class ReplayResult(BaseModel):

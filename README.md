@@ -36,18 +36,28 @@ There is a public, hosted deployment for reviewers who want to trigger a
 real replay from a browser without cloning the repo: **[link to be filled
 in after deployment - see below]**.
 
-What it is and isn't, on purpose:
+The page (`/demo`) is not a JSON console - it's built to actually show the
+system working:
 
-* **It runs a real replay.** Picking a member ID and clicking "Run live
+* **A discovery filmstrip, server-rendered from real evidence.** The top of
+  the page reads `evidence/discovery/*/run.jsonl` and its screenshots at
+  request time and renders every step of the genuine Gemini-driven
+  discovery run: the actual screen the model saw, the action it chose, and
+  its own reasoning text - not a description of it, and not hardcoded HTML
+  (`tests/integration/test_api.py::test_public_demo_page_renders_real_discovery_evidence`
+  proves the page fails closed with a clear message if that evidence is
+  ever missing, rather than silently rendering nothing).
+* **A live, real replay.** Picking a member ID and clicking "Run live
   replay" launches an actual headless-Chromium session in the deployed
   container, against the actual demo bank app also running there, through
-  the actual `ReplayEngine` - not a canned response.
+  the actual `ReplayEngine` - and now takes a real screenshot after every
+  step (`ReplayEngine(capture_screenshots=True)`, opt-in and off by default
+  elsewhere so an ordinary replay/benchmark run doesn't grow 8 unwanted
+  PNGs), rendered as a second filmstrip next to the raw JSON result.
 * **It does not run live discovery.** `PUBLIC_DEMO_MODE=true` disables
   `/runs/discover` outright (see `app/api/routes.py`) and the deployment
   has no `GEMINI_API_KEY` configured at all - a public endpoint that spends
-  real LLM budget per click is not something to expose. The genuine
-  discovery run is in `evidence/discovery/` in the repository instead -
-  real screenshots and reasoning from the actual Gemini-driven session.
+  real LLM budget per click is not something to expose.
 * **It's rate-limited and resource-capped.** The free hosting tier this
   targets caps the container at 512MB RAM; replay is capped per client
   (`PUBLIC_DEMO_RATE_LIMIT`, default 6 per 10 minutes) to keep the shared

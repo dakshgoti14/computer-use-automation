@@ -118,10 +118,72 @@ def test_public_demo_mode_rate_limits_replay(public_demo_client):
 
 
 def test_public_demo_page_is_served(public_demo_client):
+    # This fixture's evidence dir is a fresh tmp_path with no discovery
+    # evidence in it - the page must degrade gracefully rather than error.
     response = public_demo_client.get("/demo")
     assert response.status_code == 200
-    assert "Live Replay Demo" in response.text
+    assert "Live Demo" in response.text
+    assert "Run it live: deterministic replay" in response.text
+    assert "No discovery evidence found" in response.text
+
+
+def test_public_demo_page_renders_real_discovery_evidence(public_demo_client):
+    # Seed one minimal, realistic discovery run (matching the actual event
+    # shape app/agent/loop.py writes) and confirm the page's server-side
+    # gallery builder actually finds and renders it - not hardcoded HTML.
+    import json
+
+    settings = public_demo_client.app.state.integration.settings
+    run_dir = settings.evidence_dir / "discovery" / "fake-run-1"
+    (run_dir / "screenshots").mkdir(parents=True)
+    (run_dir / "screenshots" / "step-01-before.png").write_bytes(
+        b"\x89PNG\r\n\x1a\n" + b"\x00" * 16  # minimal-but-real PNG-shaped bytes
+    )
+    events = [
+        {"event_type": "run_started", "details": {"goal": "Look up a member"}},
+        {"event_type": "observation", "step_id": "step-01",
+         "details": {"url": "http://x/login", "title": "Sign In"}},
+        {"event_type": "agent_decision", "step_id": "step-01", "action": "click",
+         "details": {"reasoning": "Click Sign In to log in."}},
+    ]
+    run_dir.joinpath("run.jsonl").write_text("\n".join(json.dumps(e) for e in events))
+
+    response = public_demo_client.get("/demo")
+    assert response.status_code == 200
+    assert "No discovery evidence found" not in response.text
+    assert "Click Sign In to log in." in response.text
+    assert "step-01" in response.text
 
 
 def test_demo_page_not_served_when_public_demo_mode_is_off(api_client):
     assert api_client.get("/demo").status_code == 404
+
+
+def test_evidence_file_serves_a_real_file_inside_evidence_dir(public_demo_client):
+    settings = public_demo_client.app.state.integration.settings
+    target = settings.evidence_dir / "some.png"
+    settings.evidence_dir.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(b"\x89PNG\r\n\x1a\n")
+
+    response = public_demo_client.get("/evidence-file", params={"path": str(target.resolve())})
+    assert response.status_code == 200
+    assert response.content == b"\x89PNG\r\n\x1a\n"
+
+
+def test_evidence_file_rejects_paths_outside_evidence_dir(public_demo_client, tmp_path):
+    outside = tmp_path / "not-evidence" / "secret.txt"
+    outside.parent.mkdir(parents=True)
+    outside.write_text("do not serve me")
+
+    response = public_demo_client.get("/evidence-file", params={"path": str(outside.resolve())})
+    assert response.status_code == 403
+
+
+def test_evidence_file_not_served_when_public_demo_mode_is_off(api_client, tmp_path):
+    settings = api_client.app.state.integration.settings
+    target = settings.evidence_dir / "some.png"
+    settings.evidence_dir.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(b"\x89PNG\r\n\x1a\n")
+
+    response = api_client.get("/evidence-file", params={"path": str(target.resolve())})
+    assert response.status_code == 404

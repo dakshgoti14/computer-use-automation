@@ -153,12 +153,24 @@ class ReplayEngine:
         safety_policy: SafetyPolicy,
         retry_policy: RetryPolicy | None = None,
         evidence: EvidenceWriter | None = None,
+        capture_screenshots: bool = False,
     ) -> None:
         self.surface = surface
         self.safety_policy = safety_policy
         self.retry_policy = retry_policy or RetryPolicy()
         self.evidence = evidence
+        # Off by default: a 10-run benchmark or the test suite has no use
+        # for 8 PNGs per run, and the existing evidence/ tree was built
+        # without them. The one real caller that wants this is the public
+        # demo page (app/api/routes.py), which exists specifically to show
+        # a human what the browser actually saw at each step.
+        self._capture_screenshots = capture_screenshots and evidence is not None
         self._run_id: str = ""
+
+    async def _maybe_screenshot(self, label: str) -> str | None:
+        if not self._capture_screenshots or not self.evidence:
+            return None
+        return await self.surface.screenshot(self.evidence.screenshot_path(label))
 
     def _log(self, event_type: EventType, run_id: str | None = None, **fields: object) -> None:
         if not self.evidence:
@@ -275,11 +287,12 @@ class ReplayEngine:
                                    status="allowed" if decision.allowed else "blocked",
                                    details={"reason": decision.reason, "risk": decision.risk_level.value})
                         if not decision.allowed:
+                            screenshot_ref = await self._maybe_screenshot(f"{step.step_id}-blocked")
                             step_outcomes.append(StepOutcome(
                                 step_id=step.step_id, action=step.action.value, status="blocked",
                                 duration_ms=(time.monotonic() - step_started) * 1000,
                                 attempts=attempt, error_code=ErrorCode.ACTION_BLOCKED_BY_POLICY.value,
-                                error_message=decision.reason,
+                                error_message=decision.reason, screenshot_ref=screenshot_ref,
                             ))
                             return self._finish(
                                 run_id, started, artifact, ReplayStatus.ESCALATED,
@@ -306,10 +319,11 @@ class ReplayEngine:
                             extracted or "", out_type, output_name=step.output_name
                         )
 
+                    screenshot_ref = await self._maybe_screenshot(f"{step.step_id}-success")
                     step_outcomes.append(StepOutcome(
                         step_id=step.step_id, action=step.action.value, status="success",
                         duration_ms=(time.monotonic() - step_started) * 1000, attempts=attempt,
-                        checkpoints=checkpoint_results,
+                        checkpoints=checkpoint_results, screenshot_ref=screenshot_ref,
                     ))
                     self._log(EventType.ACTION_EXECUTED, run_id, step_id=step.step_id,
                                action=step.action.value, status="success")
@@ -338,10 +352,12 @@ class ReplayEngine:
 
                     # Business outcome: not a bug, stop the run and report it.
                     if err.category == ErrorCategory.BUSINESS_OUTCOME:
+                        screenshot_ref = await self._maybe_screenshot(f"{step.step_id}-business-outcome")
                         step_outcomes.append(StepOutcome(
                             step_id=step.step_id, action=step.action.value, status="business_outcome",
                             duration_ms=(time.monotonic() - step_started) * 1000, attempts=attempt,
                             error_code=err.code.value, error_message=err.message,
+                            screenshot_ref=screenshot_ref,
                         ))
                         return self._finish(
                             run_id, started, artifact, ReplayStatus.BUSINESS_OUTCOME,
@@ -365,10 +381,12 @@ class ReplayEngine:
                         continue  # retry the same step
 
                     # Retries exhausted or not retryable -> hard failure/escalation.
+                    screenshot_ref = await self._maybe_screenshot(f"{step.step_id}-failed")
                     step_outcomes.append(StepOutcome(
                         step_id=step.step_id, action=step.action.value, status="failed",
                         duration_ms=(time.monotonic() - step_started) * 1000, attempts=attempt,
                         error_code=err.code.value, error_message=err.message,
+                        screenshot_ref=screenshot_ref,
                     ))
                     final_status = (
                         ReplayStatus.ESCALATED

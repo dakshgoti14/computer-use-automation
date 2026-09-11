@@ -9,8 +9,10 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
+from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import FileResponse
 
 from app.agent.loop import DiscoveryEngine
 from app.agent.planner import Planner
@@ -149,6 +151,11 @@ async def replay_capability(request: Request, capability_id: str, body: ReplayRe
         surface,
         safety_policy=SafetyPolicy(allowed_domains=artifact.safety.allowed_domains),
         evidence=evidence,
+        # Screenshots exist so a human can *see* the browser driving the
+        # real UI - the public demo's whole point. Skipped otherwise so a
+        # benchmark run or a script invocation doesn't silently grow 8 PNGs
+        # nobody asked for (see ReplayEngine.__init__'s docstring).
+        capture_screenshots=state.settings.public_demo_mode,
     )
 
     try:
@@ -163,6 +170,33 @@ async def replay_capability(request: Request, capability_id: str, body: ReplayRe
         message=result.message, created_at=_now(), evidence_ref=result.evidence_ref,
     ))
     return result
+
+
+@router.get("/evidence-file")
+async def evidence_file(request: Request, path: str) -> FileResponse:
+    """Serve one evidence file (a screenshot) by absolute path.
+
+    Only enabled in public-demo mode, and only ever for the public demo
+    page's own screenshots - `path` is checked to resolve underneath
+    ``settings.evidence_dir`` before anything is served, rejecting any
+    attempt to walk outside it (``../``, absolute paths elsewhere, symlink
+    tricks) regardless of where the `path` value came from. Not a general
+    file browser: no directory listing, and non-existent paths 404.
+    """
+
+    state = _state(request)
+    if not state.settings.public_demo_mode:
+        raise HTTPException(status_code=404)
+
+    root = Path(state.settings.evidence_dir).resolve()
+    try:
+        target = Path(path).resolve()
+        target.relative_to(root)
+    except (ValueError, OSError) as exc:
+        raise HTTPException(status_code=403, detail="path is outside the evidence directory") from exc
+    if not target.is_file():
+        raise HTTPException(status_code=404)
+    return FileResponse(target)
 
 
 @router.get("/runs/{run_id}", response_model=RunRecord)
@@ -180,7 +214,6 @@ async def get_run_events(request: Request, run_id: str) -> list[dict]:
         raise HTTPException(status_code=404, detail=f"No run with id {run_id!r}")
     if not record.evidence_ref:
         return []
-    from pathlib import Path
 
     events_path = Path(record.evidence_ref) / "run.jsonl"
     if not events_path.exists():
