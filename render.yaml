@@ -1,0 +1,21 @@
+# Render Blueprint for the public, replay-only demo deployment.
+# See README.md ("Live demo") for what this exposes and why, and for the
+# manual dashboard steps if you'd rather not use a Blueprint.
+services:
+  - type: web
+    name: computer-use-automation-demo
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: PUBLIC_DEMO_MODE
+        value: "true"
+      - key: HEADLESS_BROWSER
+        value: "true"
+      - key: LOG_LEVEL
+        value: "INFO"
+      # Deliberately NOT set: GEMINI_API_KEY. Live discovery is disabled
+      # outright in public-demo mode regardless (see app/api/routes.py),
+      # but leaving the key entirely absent here is a second, independent
+      # reason no public request could ever spend real LLM budget.

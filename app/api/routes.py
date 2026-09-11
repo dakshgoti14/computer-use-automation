@@ -46,6 +46,17 @@ def _now() -> str:
 @router.post("/runs/discover", response_model=DiscoverResponse)
 async def discover(request: Request, body: DiscoverRequest) -> DiscoverResponse:
     state = _state(request)
+    if state.settings.public_demo_mode:
+        # A public endpoint that spends a real LLM budget per click is not
+        # something to expose, independent of whether a key happens to be
+        # configured in this environment - see app/config.py.
+        raise HTTPException(
+            status_code=403,
+            detail="Live discovery is disabled in this public demo (it would spend a "
+            "real LLM budget per click). See evidence/discovery/ in the repository "
+            "for the genuine discovery run's transcript and screenshots, or run "
+            "`make discover` locally with your own GEMINI_API_KEY.",
+        )
     try:
         provider = create_llm_provider(state.settings)
     except AutomationError as exc:
@@ -105,6 +116,24 @@ async def discover(request: Request, body: DiscoverRequest) -> DiscoverResponse:
 @router.post("/capabilities/{capability_id}/replay", response_model=ReplayResult)
 async def replay_capability(request: Request, capability_id: str, body: ReplayRequest) -> ReplayResult:
     state = _state(request)
+
+    if state.settings.public_demo_mode:
+        if capability_id not in state.settings.public_demo_allowed_capabilities:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Capability {capability_id!r} is not replayable in this public demo.",
+            )
+        client_key = request.headers.get("x-forwarded-for", "").split(",")[0].strip() or (
+            request.client.host if request.client else "unknown"
+        )
+        if not state.replay_rate_limiter.allow(client_key):
+            raise HTTPException(
+                status_code=429,
+                detail="Rate limit reached for this public demo - each real replay spins "
+                "up a real browser in a small shared container. Please wait a few "
+                "minutes, or clone the repository and run `make replay` locally.",
+            )
+
     try:
         artifact = state.artifact_store.load(capability_id)
     except AutomationError as exc:

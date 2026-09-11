@@ -30,6 +30,64 @@ reads the artifact and drives the same browser surface with no model in the
 loop - this is proven mechanically, not just asserted (see
 ["Replay zero-LLM guarantee"](#15-replay-zero-llm-guarantee)).
 
+## Live demo (hosted, optional)
+
+There is a public, hosted deployment for reviewers who want to trigger a
+real replay from a browser without cloning the repo: **[link to be filled
+in after deployment - see below]**.
+
+What it is and isn't, on purpose:
+
+* **It runs a real replay.** Picking a member ID and clicking "Run live
+  replay" launches an actual headless-Chromium session in the deployed
+  container, against the actual demo bank app also running there, through
+  the actual `ReplayEngine` - not a canned response.
+* **It does not run live discovery.** `PUBLIC_DEMO_MODE=true` disables
+  `/runs/discover` outright (see `app/api/routes.py`) and the deployment
+  has no `GEMINI_API_KEY` configured at all - a public endpoint that spends
+  real LLM budget per click is not something to expose. The genuine
+  discovery run is in `evidence/discovery/` in the repository instead -
+  real screenshots and reasoning from the actual Gemini-driven session.
+* **It's rate-limited and resource-capped.** The free hosting tier this
+  targets caps the container at 512MB RAM; replay is capped per client
+  (`PUBLIC_DEMO_RATE_LIMIT`, default 6 per 10 minutes) to keep the shared
+  instance responsive. A 429 means "wait a few minutes" or "clone the repo
+  and run `make replay` locally," not a bug.
+* **First request after idle may be slow.** Free-tier web services on most
+  hosts sleep after ~15 minutes of no traffic; the first request after that
+  wakes the container and can take 30-60 seconds.
+
+### Deploying it yourself
+
+This targets [Render](https://render.com) (Docker-based, free web-service
+tier, no credit card required for that tier):
+
+1. Push this repository to GitHub (already done if you're reading this
+   from the pushed repo).
+2. On Render: **New +** -> **Blueprint** -> connect this GitHub repo.
+   Render reads `render.yaml` at the repo root and provisions the service
+   automatically - no manual environment variable entry needed, and
+   critically, no `GEMINI_API_KEY` is set (see above for why that's
+   deliberate, not an oversight).
+3. Click **Apply**. The first build takes a few minutes (installing
+   Playwright's Chromium is the slow part). This was tested locally with
+   `docker build . && docker run` end to end, including a real replay
+   inside a 512MB-capped container, before being documented here as
+   working - see `Dockerfile` and `docker/start.sh`.
+4. Once deployed, visit `https://<your-service-name>.onrender.com/demo`.
+
+If you'd rather not use the Blueprint: **New +** -> **Web Service** ->
+connect the repo -> Environment: **Docker** -> add the three env vars from
+`render.yaml`'s `envVars` list manually, leaving `GEMINI_API_KEY` unset.
+
+To run the same image locally instead of deploying it:
+
+```bash
+docker build -t cua-demo .
+docker run -p 8000:8000 cua-demo
+# then open http://127.0.0.1:8000/demo
+```
+
 ## 2. Architecture
 
 ```

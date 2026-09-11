@@ -52,6 +52,20 @@ class Settings(BaseSettings):
     replay_max_retries: int = Field(default=2, alias="REPLAY_MAX_RETRIES")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
 
+    # Public demo deployment (e.g. Render). When true: /runs/discover is
+    # disabled outright (a public endpoint that spends a real LLM budget
+    # per click is not something to expose, regardless of whether a key
+    # happens to be configured), replay is restricted to a small allowlist
+    # of capabilities, and the replay endpoint is rate-limited per client.
+    # False (the default) is the normal local/CI posture and changes
+    # nothing about how the system behaves.
+    public_demo_mode: bool = Field(default=False, alias="PUBLIC_DEMO_MODE")
+    public_demo_allowed_capabilities: tuple[str, ...] = ("member_savings_lookup",)
+    public_demo_rate_limit_per_window: int = Field(default=6, alias="PUBLIC_DEMO_RATE_LIMIT")
+    public_demo_rate_limit_window_seconds: int = Field(
+        default=600, alias="PUBLIC_DEMO_RATE_LIMIT_WINDOW_SECONDS"
+    )
+
     def require_gemini_api_key(self) -> str:
         """Return the raw Gemini API key or raise a clear config error.
 

@@ -15,6 +15,8 @@ from pathlib import Path
 
 from fastapi import FastAPI
 
+from app.api.demo_page import demo_page
+from app.api.rate_limit import RateLimiter
 from app.api.routes import router
 from app.api.run_store import RunStore
 from app.artifacts.store import ArtifactStore
@@ -31,6 +33,7 @@ class IntegrationState:
     intervention_manager: InterventionManager
     artifact_store: ArtifactStore
     run_store: RunStore
+    replay_rate_limiter: RateLimiter
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -54,6 +57,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         intervention_manager=InterventionManager(session_registry, evidence_root=settings.evidence_dir),
         artifact_store=ArtifactStore(settings.capabilities_dir),
         run_store=RunStore(Path(settings.evidence_dir) / "runs.sqlite3"),
+        replay_rate_limiter=RateLimiter(
+            max_requests=settings.public_demo_rate_limit_per_window,
+            window_seconds=settings.public_demo_rate_limit_window_seconds,
+        ),
     )
 
     app.include_router(router)
@@ -61,6 +68,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/health")
     async def health() -> dict:
         return {"status": "ok"}
+
+    if settings.public_demo_mode:
+        @app.get("/demo")
+        async def demo():  # noqa: ANN202 - HTMLResponse, kept local to avoid an unused import path when disabled
+            return demo_page()
+
+        @app.get("/")
+        async def root_redirect():
+            from fastapi.responses import RedirectResponse
+
+            return RedirectResponse(url="/demo")
 
     return app
 
