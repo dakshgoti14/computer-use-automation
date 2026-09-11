@@ -1,0 +1,14 @@
+{
+  "benchmark_id": "221cb137cf76",
+  "capability_id": "member_savings_lookup",
+  "member_id": "12345",
+  "total_runs": 10,
+  "successful_runs": 10,
+  "business_outcome_runs": 0,
+  "failed_runs": 0,
+  "failure_rate": 0.0,
+  "checkpoint_failures": 0,
+  "avg_duration_ms": 1696.7,
+  "min_duration_ms": 1676.1,
+  "max_duration_ms": 1734.1
+}

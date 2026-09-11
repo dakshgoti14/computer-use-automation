@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Sign In - Riverbend{% endblock %}
+{% block content %}
+<h1>Sign In</h1>
+<p class="muted">This is a synthetic demo application. No real credentials are required.</p>
+<form method="post" action="/login">
+  <label for="username">Username</label>
+  <input type="text" id="username" name="username" value="operator" data-testid="login-username" />
+  <label for="password">Password</label>
+  <input type="password" id="password" name="password" value="demo-password" data-testid="login-password" />
+  <button type="submit" data-testid="login-submit">Sign In</button>
+</form>
+{% endblock %}

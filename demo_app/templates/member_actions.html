@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Account Actions - Riverbend{% endblock %}
+{% block content %}
+<h1>Account Actions: {{ member.name }}</h1>
+<p class="muted">Restricted actions below move funds or change account state. Automation must
+   escalate these to a human operator rather than executing them.</p>
+
+<form method="post" action="/members/{{ member.member_id }}/transfer">
+  <label for="amount">Transfer Amount (from Savings to Checking)</label>
+  <input type="text" id="amount" name="amount" value="100.00" data-testid="transfer-amount" />
+  <button type="submit" class="danger" data-testid="transfer-funds-submit">Transfer Funds</button>
+</form>
+
+<a class="btn" href="/members/{{ member.member_id }}">Back to Member Details</a>
+{% endblock %}

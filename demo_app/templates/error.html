@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Unexpected Error - Riverbend{% endblock %}
+{% block content %}
+<h1>Something went wrong</h1>
+<div class="flash" role="alert" data-testid="unexpected-error-banner">
+  An unexpected error occurred while processing your request. Please try again later or contact support.
+</div>
+<a class="btn" href="/dashboard">Return to Dashboard</a>
+{% endblock %}

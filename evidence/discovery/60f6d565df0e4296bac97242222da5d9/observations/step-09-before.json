@@ -1,0 +1,103 @@
+{
+  "url": "http://127.0.0.1:8001/members/12345",
+  "title": "[REDACTED] - Riverbend",
+  "visible_text": "Riverbend Community Credit Union \u2014 Member Services Dashboard Search Members Member Details: Jordan Alvarez [REDACTED] Status Active Savings Balance $4,231.55 Checking Balance $1,204.10 Account Actions",
+  "interactive_elements": [
+    {
+      "element_id": "e0",
+      "tag": "a",
+      "role": "link",
+      "accessible_name": "Dashboard",
+      "label": null,
+      "test_id": null,
+      "text": "Dashboard",
+      "input_type": null,
+      "placeholder": null,
+      "is_visible": true,
+      "is_disabled": false
+    },
+    {
+      "element_id": "e1",
+      "tag": "a",
+      "role": "link",
+      "accessible_name": "Search Members",
+      "label": null,
+      "test_id": null,
+      "text": "Search Members",
+      "input_type": null,
+      "placeholder": null,
+      "is_visible": true,
+      "is_disabled": false
+    },
+    {
+      "element_id": "e2",
+      "tag": "table",
+      "role": null,
+      "accessible_name": "[REDACTED]\n      StatusActive\n      Savings Balance$4,231.55\n      Checking Balance$1,204.10",
+      "label": null,
+      "test_id": "member-detail-table",
+      "text": "[REDACTED]\n      StatusActive\n      Savings Balance$4,231.55\n      Checking Balance$1,204.10",
+      "input_type": null,
+      "placeholder": null,
+      "is_visible": true,
+      "is_disabled": false
+    },
+    {
+      "element_id": "e3",
+      "tag": "td",
+      "role": null,
+      "accessible_name": "Active",
+      "label": null,
+      "test_id": "member-status",
+      "text": "Active",
+      "input_type": null,
+      "placeholder": null,
+      "is_visible": true,
+      "is_disabled": false
+    },
+    {
+      "element_id": "e4",
+      "tag": "td",
+      "role": null,
+      "accessible_name": "$4,231.55",
+      "label": null,
+      "test_id": "savings-balance",
+      "text": "$4,231.55",
+      "input_type": null,
+      "placeholder": null,
+      "is_visible": true,
+      "is_disabled": false
+    },
+    {
+      "element_id": "e5",
+      "tag": "td",
+      "role": null,
+      "accessible_name": "$1,204.10",
+      "label": null,
+      "test_id": "checking-balance",
+      "text": "$1,204.10",
+      "input_type": null,
+      "placeholder": null,
+      "is_visible": true,
+      "is_disabled": false
+    },
+    {
+      "element_id": "e6",
+      "tag": "a",
+      "role": "link",
+      "accessible_name": "Account Actions",
+      "label": null,
+      "test_id": "nav-account-actions",
+      "text": "Account Actions",
+      "input_type": null,
+      "placeholder": null,
+      "is_visible": true,
+      "is_disabled": false
+    }
+  ],
+  "form_fields": [],
+  "page_kind": "unknown",
+  "banner_messages": [],
+  "screenshot_ref": null,
+  "truncated": false
+}

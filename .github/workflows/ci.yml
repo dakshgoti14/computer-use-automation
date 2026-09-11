@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Install Playwright browsers
+        run: python -m playwright install --with-deps chromium
+
+      - name: Lint (ruff)
+        run: ruff check app demo_app tests scripts
+
+      - name: Type check (mypy)
+        run: mypy app demo_app
+
+      - name: Test (pytest)
+        # LLM_PROVIDER defaults to "mock" here on purpose: CI never needs, and
+        # must never require, a real GEMINI_API_KEY. The genuine Gemini
+        # discovery run is an explicit local/demo command
+        # (scripts/discover_capability.py), never a CI gate - see README
+        # "Replay zero-LLM guarantee" and REPORT.md "Determinism & error
+        # handling" for why replay's correctness does not depend on it.
+        env:
+          LLM_PROVIDER: mock
+        run: pytest tests/ -v

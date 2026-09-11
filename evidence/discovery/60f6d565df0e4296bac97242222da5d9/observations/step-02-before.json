@@ -1,0 +1,66 @@
+{
+  "url": "http://127.0.0.1:8001/login",
+  "title": "Sign In - Riverbend",
+  "visible_text": "Riverbend Community Credit Union \u2014 Member Services Sign In This is a synthetic demo application. No real credentials are required. Username Password Sign In",
+  "interactive_elements": [
+    {
+      "element_id": "e0",
+      "tag": "input",
+      "role": "textbox",
+      "accessible_name": "Username",
+      "label": "Username",
+      "test_id": "login-username",
+      "text": null,
+      "input_type": "text",
+      "placeholder": null,
+      "is_visible": true,
+      "is_disabled": false
+    },
+    {
+      "element_id": "e1",
+      "tag": "input",
+      "role": "textbox",
+      "accessible_name": "Password",
+      "label": "Password",
+      "test_id": "login-password",
+      "text": null,
+      "input_type": "password",
+      "placeholder": null,
+      "is_visible": true,
+      "is_disabled": false
+    },
+    {
+      "element_id": "e2",
+      "tag": "button",
+      "role": "button",
+      "accessible_name": "Sign In",
+      "label": null,
+      "test_id": "login-submit",
+      "text": "Sign In",
+      "input_type": null,
+      "placeholder": null,
+      "is_visible": true,
+      "is_disabled": false
+    }
+  ],
+  "form_fields": [
+    {
+      "name": "username",
+      "field_type": "text",
+      "label": "Username",
+      "value": "operator",
+      "required": false
+    },
+    {
+      "name": "password",
+      "field_type": "password",
+      "label": "Password",
+      "value": null,
+      "required": false
+    }
+  ],
+  "page_kind": "unknown",
+  "banner_messages": [],
+  "screenshot_ref": null,
+  "truncated": false
+}

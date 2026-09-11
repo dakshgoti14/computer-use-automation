@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Member {{ member.member_id }} - Riverbend{% endblock %}
+{% block content %}
+<h1>Member Details: {{ member.name }}</h1>
+
+{% if variant == "b" %}
+  {# Variant B: a different vendor-style UI for the SAME logical data.
+     Deliberately uses different labels/structure and no data-testid on the
+     balance figures, so a capability recorded against Variant A needs a
+     locator_profile override to replay correctly here. #}
+  <div class="vendor-b-panel-{{ rand }}">
+    <p><strong>Status:</strong> <span data-testid="member-status">{{ member.status }}</span></p>
+    <section class="balance-card">
+      <div>Available Savings</div>
+      <div class="balance-figure" aria-label="Available Savings amount">${{ member.savings_balance }}</div>
+    </section>
+    <section class="balance-card">
+      <div>Available Checking</div>
+      <div class="balance-figure" aria-label="Available Checking amount">${{ member.checking_balance }}</div>
+    </section>
+  </div>
+{% else %}
+  {# Variant A (default): the canonical layout the primary capability is
+     discovered and recorded against. #}
+  <table data-testid="member-detail-table">
+    <tbody>
+      <tr><th>Member ID</th><td>{{ member.member_id }}</td></tr>
+      <tr><th>Status</th><td data-testid="member-status">{{ member.status }}</td></tr>
+      <tr><th>Savings Balance</th><td data-testid="savings-balance">${{ member.savings_balance }}</td></tr>
+      <tr><th>Checking Balance</th><td data-testid="checking-balance">${{ member.checking_balance }}</td></tr>
+    </tbody>
+  </table>
+{% endif %}
+
+<a class="btn" href="/members/{{ member.member_id }}/actions" data-testid="nav-account-actions">Account Actions</a>
+{% endblock %}

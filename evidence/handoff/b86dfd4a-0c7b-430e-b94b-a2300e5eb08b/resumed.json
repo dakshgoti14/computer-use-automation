@@ -1,0 +1,25 @@
+{
+  "intervention_id": "b86dfd4a-0c7b-430e-b94b-a2300e5eb08b",
+  "session_id": "b1e03ce7-479a-452a-9cdb-11acf2befe9d",
+  "run_id": "e07e5419-a17a-4085-8bf5-7f32430f86e7",
+  "reason": "Safety policy blocked action: Action target matched a restricted-keyword pattern (money movement / irreversible account change). Automation must not execute this without explicit human approval.",
+  "state": "automation",
+  "context": {
+    "capability_id": "risky_transfer_demo",
+    "goal": "Transfer funds out of [REDACTED]'s savings account.",
+    "step": "step-07",
+    "current_url": "http://127.0.0.1:8001/members/24680/actions",
+    "screenshot_ref": "evidence/handoff/risky-transfer-demo/screenshots/step-07-escalation.png",
+    "attempted_action": "click role=button name='Transfer Funds'"
+  },
+  "created_at": "2026-09-11T03:24:36.916447+00:00",
+  "updated_at": "2026-09-11T03:24:36.975881+00:00",
+  "operator_notes": "Reviewed and approved for this demo.",
+  "operator_actions": [
+    {
+      "timestamp": "2026-09-11T03:24:36.975021+00:00",
+      "description": "Operator clicked 'Transfer Funds' to complete the $100.00 transfer the automation correctly refused to execute itself.",
+      "evidence_ref": "evidence/handoff/risky-transfer-demo/screenshots/operator-transfer-confirmed.png"
+    }
+  ]
+}

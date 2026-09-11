@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+computer_use_automation.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.env
+*.db
+*.sqlite3
+.DS_Store
+node_modules/
+playwright_browsers/
+.playwright/

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Member Search - Riverbend{% endblock %}
+{% block content %}
+<h1>Member Search</h1>
+<form method="post" action="/members/search">
+  <label for="member_id">Member ID</label>
+  <input type="text" id="member_id" name="member_id" placeholder="e.g. 12345"
+         value="{{ query or '' }}" data-testid="member-search-input" />
+  <button type="submit" data-testid="member-search-submit">Search</button>
+</form>
+
+{% if searched %}
+  <div class="results-panel-{{ rand }}">
+    <h2>Results</h2>
+    {% if results %}
+      <table data-testid="member-results-table">
+        <thead>
+          <tr><th>Member ID</th><th>Name</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for m in results %}
+          <tr class="row-{{ rand }}">
+            <td>{{ m.member_id }}</td>
+            <td>{{ m.name }}</td>
+            <td>{{ m.status }}</td>
+            <td><a class="btn" href="/members/{{ m.member_id }}" data-testid="view-member-{{ m.member_id }}">View {{ m.name }}</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="flash" role="alert" data-testid="search-no-results">No members found matching that search.</div>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

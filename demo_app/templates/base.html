@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>{% block title %}Riverbend Community Credit Union - Back Office{% endblock %}</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 0; background: #f4f6f8; color: #1a1a1a; }
+    header { background: #0b3d64; color: white; padding: 12px 24px; display: flex; justify-content: space-between; }
+    main { max-width: 780px; margin: 24px auto; background: white; padding: 24px 32px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+    .flash, .alert, [role="alert"] { background: #fdecea; border: 1px solid #f5c2c0; color: #8a1c1c; padding: 10px 14px; border-radius: 4px; margin-bottom: 16px; }
+    .flash.info { background: #eaf3fd; border-color: #bcd9f7; color: #0b3d64; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e2e2e2; }
+    label { display: block; margin-top: 12px; font-weight: bold; }
+    input[type=text], input[type=password] { padding: 8px; width: 100%; box-sizing: border-box; margin-top: 4px; }
+    button, .btn { background: #0b3d64; color: white; border: none; padding: 9px 18px; border-radius: 4px; cursor: pointer; margin-top: 14px; font-size: 14px; }
+    button.danger { background: #a11d1d; }
+    a.btn { display: inline-block; text-decoration: none; }
+    .balance-card { border: 1px solid #dfe3e6; border-radius: 6px; padding: 14px; margin-top: 10px; }
+    .balance-figure { font-size: 22px; font-weight: bold; }
+    nav a { color: white; margin-left: 16px; }
+    .muted { color: #666; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Riverbend Community Credit Union &mdash; Member Services</strong>
+    <nav>
+      {% if authenticated %}
+        <a href="/dashboard">Dashboard</a>
+        <a href="/members/search">Search Members</a>
+      {% endif %}
+    </nav>
+  </header>
+  <main>
+    {% for message in flash_messages %}
+      <div class="flash {{ 'info' if message.kind == 'info' else '' }}" role="alert">{{ message.text }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
